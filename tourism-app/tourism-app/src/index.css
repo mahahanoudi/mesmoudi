@@ -1,0 +1,28 @@
+/* src/index.css - Ajoutez ces variables CSS */
+:root {
+  /* Couleurs de la médina de Tétouan */
+  --tetouan-blue: #2a6ba5;        /* Bleu caractéristique */
+  --tetouan-light-blue: #5aa2d3;  /* Bleu clair */
+  --medina-white: #f8f5f0;        /* Blanc cassé des murs */
+  --terracotta: #c45c40;          /* Terre cuite */
+  --olive-green: #556b2f;         /* Vert olive */
+  --golden-yellow: #d4a017;       /* Jaune doré */
+  --dark-brown: #3d2c1a;          /* Brun foncé */
+  --sand-beige: #e6d5b8;          /* Beige sable */
+  
+  /* Couleurs utilitaires */
+  --shadow-color: rgba(42, 107, 165, 0.15);
+  --transition: all 0.3s ease;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--medina-white);
+  color: #333;
+}
