@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useUser } from '@clerk/clerk-react';
 import RestaurantService from '../../services/restaurant.service';
 import Navbar from '../common/Navbar';
 
 const RestaurantList = () => {
+    const { isSignedIn } = useUser();
     const [restaurants, setRestaurants] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -139,6 +141,34 @@ const RestaurantList = () => {
                         ⵉⵙⴻⵏⵟⴰⵔⴰⵏⵜⴻⵏ ⴷ ⵉⵎⴻⵜⵜⵉ
                     </div>
                 </h2>
+
+                {isSignedIn && (
+                    <div style={{ textAlign: 'center', marginBottom: '2rem', marginTop: '-2rem' }}>
+                        <Link
+                            to="/my-reservations"
+                            className="fade-in"
+                            style={{
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                                padding: '12px 25px',
+                                background: 'white',
+                                color: '#27ae60',
+                                borderRadius: '50px',
+                                textDecoration: 'none',
+                                fontWeight: 'bold',
+                                boxShadow: '0 5px 15px rgba(0,0,0,0.1)',
+                                transition: 'transform 0.3s ease',
+                                border: '2px solid #27ae60'
+                            }}
+                            onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-3px)'}
+                            onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+                        >
+                            <span>📅</span> Mes Réservations
+                        </Link>
+                    </div>
+                )}
+
                 <div style={styles.grid}>
                     {restaurants.map((restaurant) => (
                         <Link

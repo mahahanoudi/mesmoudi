@@ -1,17 +1,18 @@
 // src/components/common/Navbar.js
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useUser, useClerk, SignedIn, SignedOut } from '@clerk/clerk-react';
 import { FaBars, FaTimes, FaUser, FaSignOutAlt } from 'react-icons/fa';
 import './Navbar.css';
 
 const Navbar = () => {
-  const { isAuthenticated, user, logout } = useAuth();
+  const { user, isSignedIn } = useUser();
+  const { signOut } = useClerk();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await signOut();
     navigate('/');
     setIsMenuOpen(false);
   };
@@ -59,25 +60,29 @@ const Navbar = () => {
 
         {/* Actions utilisateur */}
         <div className="navbar-actions">
-          {isAuthenticated ? (
-            <>
+          <SignedIn>
+            <div className="user-info">
+              {user?.imageUrl && (
+                <img 
+                  src={user.imageUrl} 
+                  alt={user.firstName} 
+                  className="user-avatar"
+                />
+              )}
               <span className="navbar-welcome">
                 <FaUser /> Bienvenue, {user?.firstName}
               </span>
-              <button className="navbar-button logout" onClick={handleLogout}>
-                <FaSignOutAlt /> Déconnexion
-              </button>
-            </>
-          ) : (
-            <>
-              <Link to="/login" className="navbar-button login" onClick={closeMenu}>
-                Connexion
-              </Link>
-              <Link to="/register" className="navbar-button register" onClick={closeMenu}>
-                S'inscrire
-              </Link>
-            </>
-          )}
+            </div>
+            <button className="navbar-button logout" onClick={handleLogout}>
+              <FaSignOutAlt /> Déconnexion
+            </button>
+          </SignedIn>
+
+          <SignedOut>
+            <Link to="/login" className="navbar-button login" onClick={closeMenu}>
+              Connexion
+            </Link>
+          </SignedOut>
         </div>
       </div>
     </nav>

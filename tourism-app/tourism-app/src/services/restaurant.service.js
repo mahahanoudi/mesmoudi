@@ -1,14 +1,12 @@
-import axios from 'axios';
-
-const API_URL = 'http://127.0.0.1:8083/api/restaurants'; // Direct au Backend (Contournement Gateway)
+import api from './api';
 
 class RestaurantService {
     getAllRestaurants() {
-        return axios.get(API_URL);
+        return api.get('/restaurants');
     }
 
     getRestaurantById(id) {
-        return axios.get(`${API_URL}/${id}`);
+        return api.get(`/restaurants/${id}`);
     }
 }
 

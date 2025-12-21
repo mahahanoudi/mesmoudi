@@ -1,8 +1,8 @@
 com\tetouan\tourism\restaurant\controller\RestaurantController.class
-com\tetouan\tourism\restaurant\RestaurantServiceApplication.class
 com\tetouan\tourism\restaurant\service\RestaurantService.class
-com\tetouan\tourism\restaurant\model\Menu.class
 com\tetouan\tourism\restaurant\repository\RestaurantRepository.class
 com\tetouan\tourism\restaurant\config\DataInitializer.class
-com\tetouan\tourism\restaurant\repository\MenuRepository.class
 com\tetouan\tourism\restaurant\model\Restaurant.class
+com\tetouan\tourism\restaurant\RestaurantServiceApplication.class
+com\tetouan\tourism\restaurant\model\Menu.class
+com\tetouan\tourism\restaurant\repository\MenuRepository.class

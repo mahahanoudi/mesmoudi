@@ -9,13 +9,40 @@ const api = axios.create({
   },
 });
 
-// Intercepteur pour ajouter le token à chaque requête
+let getClerkToken = null;
+
+export const initializeApiWithClerk = (tokenGetter) => {
+  getClerkToken = tokenGetter;
+  console.log('✅ API initialisée avec le token getter de Clerk');
+};
+
+// ✅ Intercepteur avec JWT Template (durée de 10 minutes)
 api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+  async (config) => {
+    // Ne pas ajouter de token pour /auth/sync
+    if (config.url === '/auth/sync') {
+      return config;
     }
+
+    if (getClerkToken) {
+      try {
+        // 🔑 IMPORTANT : Utiliser le template 'backend-api' avec durée de 10 minutes
+        // Si vous n'avez pas encore créé le template, créez-le d'abord dans Clerk Dashboard
+        const token = await getClerkToken({ template: 'backend-api' });
+
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+          console.log('✅ Token ajouté à la requête:', config.url);
+        } else {
+          console.error('❌ Token null reçu');
+        }
+      } catch (error) {
+        console.error('❌ Erreur récupération token:', error);
+      }
+    } else {
+      console.error('❌ getClerkToken non initialisé');
+    }
+
     return config;
   },
   (error) => {
@@ -23,52 +50,54 @@ api.interceptors.request.use(
   }
 );
 
-// Intercepteur pour gérer les erreurs de réponse
+// Gestion des erreurs
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+    if (error.response?.status === 401 || error.response?.status === 403) {
+      console.error('❌ Non autorisé - Redirection vers login');
+
+      if (!window.location.pathname.includes('/login')) {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
 );
 
-// Services d'authentification
 export const authService = {
-  register: async (userData) => {
-    const response = await api.post('/auth/register', userData);
-    if (response.data.token) {
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data));
+  syncUser: async (clerkUser) => {
+    try {
+      const userData = {
+        clerkId: clerkUser.id,
+        email: clerkUser.primaryEmailAddress?.emailAddress,
+        firstName: clerkUser.firstName,
+        lastName: clerkUser.lastName,
+        imageUrl: clerkUser.imageUrl,
+        role: clerkUser.publicMetadata?.role || 'Member'
+      };
+
+      console.log('🔄 Synchronisation utilisateur:', userData.email);
+      const response = await api.post('/auth/sync', userData);
+      console.log('✅ Synchronisation réussie');
+      return response.data;
+    } catch (error) {
+      console.error('❌ Erreur synchronisation:', error);
+      throw error;
     }
-    return response.data;
   },
 
-  login: async (credentials) => {
-    const response = await api.post('/auth/login', credentials);
-    if (response.data.token) {
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data));
+  getUserProfile: async () => {
+    try {
+      console.log('📥 Appel /api/auth/profile...');
+      const response = await api.get('/auth/profile');
+      console.log('✅ Profil récupéré');
+      return response.data;
+    } catch (error) {
+      console.error('❌ Erreur récupération profil:', error);
+      throw error;
     }
-    return response.data;
-  },
-
-  logout: () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-  },
-
-  getCurrentUser: () => {
-    const userStr = localStorage.getItem('user');
-    return userStr ? JSON.parse(userStr) : null;
-  },
-
-  isAuthenticated: () => {
-    return !!localStorage.getItem('token');
-  },
+  }
 };
 
 export default api;

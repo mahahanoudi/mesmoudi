@@ -8,7 +8,7 @@ Write-Host ">>> Lancement de API-Gateway (8082)..."
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "& {$env:JAVA_HOME = '$env:JAVA_HOME'; $env:Path = '$env:Path'; cd 'API-Gateway\API-Gateway'; mvn spring-boot:run}"
 
 Write-Host ">>> Lancement de Auth-Service (8081)..."
-Start-Process powershell -ArgumentList "-NoExit", "-Command", "& {$env:JAVA_HOME = '$env:JAVA_HOME'; $env:Path = '$env:Path'; cd 'auth-service\auth-service'; mvn spring-boot:run}"
+Start-Process powershell -ArgumentList "-NoExit", "-Command", "& {`$env:JAVA_HOME = '$env:JAVA_HOME'; `$env:Path = '$env:Path'; cd 'auth-service\auth-service\auth-service'; mvn spring-boot:run}"
 
 Write-Host ">>> Lancement de Restaurant-Service (8083)..."
 Start-Process powershell -ArgumentList "-NoExit", "-Command", "& {$env:JAVA_HOME = '$env:JAVA_HOME'; $env:Path = '$env:Path'; cd 'restaurant-service'; mvn spring-boot:run}"

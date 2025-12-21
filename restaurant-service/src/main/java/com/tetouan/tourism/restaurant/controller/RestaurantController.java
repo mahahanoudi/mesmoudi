@@ -9,7 +9,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/restaurants")
-@CrossOrigin(origins = "http://localhost:3000") // Allow Frontend
+// CORS handled by API Gateway
 public class RestaurantController {
 
     @Autowired

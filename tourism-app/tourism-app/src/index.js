@@ -1,17 +1,28 @@
+// src/index.js - VERSION FINALE CORRIGÉE
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
-import reportWebVitals from './reportWebVitals';
+import { ClerkProvider } from '@clerk/clerk-react';
+import { frFR } from '@clerk/localizations';
+
+// ⚠️ IMPORTANT: La clé doit être exactement celle-ci
+const PUBLISHABLE_KEY = "pk_test_c3BsZW5kaWQtYW50LTMxLmNsZXJrLmFjY291bnRzLmRldiQ";
+
+if (!PUBLISHABLE_KEY) {
+  throw new Error("❌ Missing Clerk Publishable Key");
+}
+
+console.log("✅ Clerk Publishable Key détectée:", PUBLISHABLE_KEY.substring(0, 20) + "...");
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    <ClerkProvider 
+      publishableKey={PUBLISHABLE_KEY}
+      localization={frFR}
+    >
+      <App />
+    </ClerkProvider>
   </React.StrictMode>
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();

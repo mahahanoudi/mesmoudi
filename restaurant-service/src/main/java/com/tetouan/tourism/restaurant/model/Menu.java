@@ -4,8 +4,11 @@ import jakarta.persistence.*;
 import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
+import lombok.ToString;
+
 @Entity
 @Data
+@ToString(exclude = "restaurant")
 public class Menu {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

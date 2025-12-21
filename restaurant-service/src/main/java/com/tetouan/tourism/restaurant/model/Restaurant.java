@@ -4,8 +4,11 @@ import jakarta.persistence.*;
 import lombok.Data;
 import java.util.List;
 
+import lombok.ToString;
+
 @Entity
 @Data
+@ToString(exclude = "menus")
 public class Restaurant {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

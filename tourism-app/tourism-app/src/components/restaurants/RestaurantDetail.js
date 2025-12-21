@@ -197,14 +197,14 @@ const RestaurantDetail = () => {
                     <div style={styles.card} className="fade-in">
                         <div style={styles.menuHeader}>
                             <h2 style={{ ...styles.sectionTitle, marginBottom: 0 }}>Menu / Carte</h2>
-                            <a
-                                href={`/reservation/${restaurant.id}`}
+                            <Link
+                                to={`/reservation/${restaurant.id}`}
                                 style={styles.reserveButton}
                                 onMouseOver={(e) => e.target.style.backgroundColor = '#219a52'}
                                 onMouseOut={(e) => e.target.style.backgroundColor = '#27ae60'}
                             >
                                 🍽️ Réserver une table
-                            </a>
+                            </Link>
                         </div>
                         <div style={styles.menuGrid}>
                             {restaurant.menus && restaurant.menus.length > 0 ? (
