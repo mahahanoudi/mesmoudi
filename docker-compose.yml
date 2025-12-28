@@ -1,0 +1,194 @@
+
+
+services:
+  # Base de données MySQL
+  mysql-db:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    ports:
+      - "3306:3306"
+    volumes:
+      # Montage des scripts SQL d'initialisation
+      - ./create_db.sql:/docker-entrypoint-initdb.d/1-create_auth_db.sql
+      - ./create_restaurant_db.sql:/docker-entrypoint-initdb.d/2-create_resto_db.sql
+      - ./create_flight_db.sql:/docker-entrypoint-initdb.d/3-create_flight_db.sql
+      - ./create_hotel_db.sql:/docker-entrypoint-initdb.d/4-create_hotel_db.sql
+      - ./create_guide_db.sql:/docker-entrypoint-initdb.d/5-create_guide_db.sql
+      # Persistance des données (optionnel mais recommandé)
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+
+  # phpMyAdmin pour visualiser la base de données
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin
+    ports:
+      - "8085:80"
+    environment:
+      - PMA_HOST=mysql-db
+      - PMA_ARBITRARY=1
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+  # Auth Service
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: auth-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/tetouan_tourism_auth?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+
+  # Restaurant Service
+  restaurant-service:
+    build:
+      context: ./restaurant-service
+      dockerfile: Dockerfile
+    container_name: restaurant-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/tetouan_tourism_restaurant?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+
+  # Flight Service
+  flightservice:
+    build:
+      context: ./flightservice
+      dockerfile: Dockerfile
+    container_name: flightservice
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/flight_service?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ./API-Gateway/API-Gateway
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    ports:
+      - "8082:8082"
+    environment:
+      # Surcharge des routes pour utiliser les noms de service Docker
+      - SPRING_CLOUD_GATEWAY_ROUTES_0_ID=auth-service
+      - SPRING_CLOUD_GATEWAY_ROUTES_0_URI=http://auth-service:8081
+      - SPRING_CLOUD_GATEWAY_ROUTES_0_PREDICATES_0=Path=/api/auth/**
+      - SPRING_CLOUD_GATEWAY_ROUTES_1_ID=restaurant-service
+      - SPRING_CLOUD_GATEWAY_ROUTES_1_URI=http://restaurant-service:8083
+      - SPRING_CLOUD_GATEWAY_ROUTES_1_PREDICATES_0=Path=/api/restaurants/**, /api/reservations/**
+      - SPRING_CLOUD_GATEWAY_ROUTES_2_ID=flightservice
+      - SPRING_CLOUD_GATEWAY_ROUTES_2_URI=http://flightservice:8084
+      - SPRING_CLOUD_GATEWAY_ROUTES_2_PREDICATES_0=Path=/api/flights/**
+      - SPRING_CLOUD_GATEWAY_ROUTES_3_ID=hotel-service-hotels
+      - SPRING_CLOUD_GATEWAY_ROUTES_3_URI=http://hotel-service:8086
+      - SPRING_CLOUD_GATEWAY_ROUTES_3_PREDICATES_0=Path=/api/hotels/**
+      - SPRING_CLOUD_GATEWAY_ROUTES_4_ID=hotel-service-reservations
+      - SPRING_CLOUD_GATEWAY_ROUTES_4_URI=http://hotel-service:8086
+      - SPRING_CLOUD_GATEWAY_ROUTES_4_PREDICATES_0=Path=/api/hotel-reservations/**
+      - SPRING_CLOUD_GATEWAY_ROUTES_5_ID=guide-service
+      - SPRING_CLOUD_GATEWAY_ROUTES_5_URI=http://guide-service:8087
+      - SPRING_CLOUD_GATEWAY_ROUTES_5_PREDICATES_0=Path=/api/guides/**
+    depends_on:
+      - auth-service
+      - restaurant-service
+      - flightservice
+      - hotel-service
+      - guide-service
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+
+  # Frontend (Tourism App) - Production Build with Nginx
+  tourism-app:
+    build:
+      context: ./tourism-app/tourism-app
+      dockerfile: Dockerfile
+    container_name: tourism-app
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  # Hotel Service
+  hotel-service:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: hotel-service
+    ports:
+      - "8086:8086"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/tetouan_hotels?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+
+  # Guide Service
+  guide-service:
+    build:
+      context: ./guide_service
+      dockerfile: Dockerfile
+    container_name: guide-service
+    ports:
+      - "8087:8087"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql-db:3306/tetouan_tourism_guides?createDatabaseIfNotExist=true
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=
+    depends_on:
+      mysql-db:
+        condition: service_healthy
+    deploy:
+      resources:
+        limits:
+          memory: 384M
+
+volumes:
+  mysql_data:

@@ -1,35 +1,38 @@
-// src/components/auth/Login.js
 import React from 'react';
 import { useSignIn, useUser } from '@clerk/clerk-react';
 import { useNavigate } from 'react-router-dom';
 import { FaGoogle } from 'react-icons/fa';
-
 import Navbar from '../common/Navbar';
 import './Login.css';
 
 const Login = () => {
   const { signIn } = useSignIn();
-  const { isSignedIn } = useUser();
+  const { isSignedIn, user } = useUser();
   const navigate = useNavigate();
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState('');
 
-
+  // 🔥 CENTRALISATION DES REDIRECTIONS ICI - DÉSACTIVÉE
   React.useEffect(() => {
-    if (isSignedIn) {
-      navigate('/');
+    if (isSignedIn && user) {
+      console.log('✅ Utilisateur connecté détecté dans Login');
+      console.log('🔍 Rôle utilisateur:', user.publicMetadata?.role);
+
+      // Redirection désactivée - L'utilisateur reste sur l'accueil après connexion
+      // Il peut accéder au dashboard via la navbar s'il le souhaite
     }
-  }, [isSignedIn, navigate]);
+  }, [isSignedIn, user, navigate]);
 
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setError('');
 
     try {
+      console.log('🚀 Connexion Google en cours...');
       await signIn.authenticateWithRedirect({
         strategy: 'oauth_google',
         redirectUrl: '/sso-callback',
-        redirectUrlComplete: '/'
+        redirectUrlComplete: '/' // Redirection neutre vers l'accueil
       });
     } catch (err) {
       console.error('Erreur de connexion:', err);

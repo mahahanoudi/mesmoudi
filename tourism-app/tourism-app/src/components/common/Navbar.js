@@ -44,9 +44,7 @@ const Navbar = () => {
           <li className="navbar-item">
             <Link to="/" className="navbar-link" onClick={closeMenu}>Accueil</Link>
           </li>
-          <li className="navbar-item">
-            <Link to="/monuments" className="navbar-link" onClick={closeMenu}>Monuments</Link>
-          </li>
+
           <li className="navbar-item">
             <Link to="/restaurants" className="navbar-link" onClick={closeMenu}>Restaurants</Link>
           </li>
@@ -54,7 +52,13 @@ const Navbar = () => {
             <Link to="/guide" className="navbar-link" onClick={closeMenu}>Guide</Link>
           </li>
           <li className="navbar-item">
+            <Link to="/flights" className="navbar-link" onClick={closeMenu}>Vols</Link> {/* AJOUTER CECI */}
+          </li>
+          <li className="navbar-item">
             <Link to="/contact" className="navbar-link" onClick={closeMenu}>Contact</Link>
+          </li>
+          <li className="navbar-item">
+            <Link to="/hotels" className="navbar-link" onClick={closeMenu}>Hôtels</Link>
           </li>
         </ul>
 
@@ -63,9 +67,9 @@ const Navbar = () => {
           <SignedIn>
             <div className="user-info">
               {user?.imageUrl && (
-                <img 
-                  src={user.imageUrl} 
-                  alt={user.firstName} 
+                <img
+                  src={user.imageUrl}
+                  alt={user.firstName}
                   className="user-avatar"
                 />
               )}
